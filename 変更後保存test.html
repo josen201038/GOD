@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Selection Example</title>
+</head>
+<body>
+
+<div id="content">
+    <p>ここに長い文章を入れます。ユーザーはこの文章の一部をマウスでドラッグすることで選択できます。</p>
+    <p>2段落目も選択できるように用意します。</p>
+</div>
+
+<script>
+    let originalText = "";
+
+    document.addEventListener('mouseup', function(e){
+
+        let startOffset = 0;
+        let endOffset = 0;
+
+        let selectedText = "";
+        if(window.getSelection){
+            selectedText = window.getSelection().toString();
+            startOffset = window.getSelection().anchorOffset;
+            endOffset = window.getSelection().focusOffset;
+        }
+        else if(document.selection){
+            selectedText = document.selection.createRange().text;
+        }
+
+        if(selectedText){
+            // アラートで項目を取得
+            const selectedItems = prompt("項目をコンマで区切って入力してください").split(",");
+
+            originalText = document.getElementById("content").innerHTML;
+
+            // 選択テキストを削除
+            let selection = window.getSelection();
+            if(selection.toString().length > 0){
+                selection.deleteFromDocument();
+            }
+
+            // ここから入力要素の追加処理
+
+            if ( selectedItems == ""){
+
+                let selection = window.getSelection();
+                if (selection.toString().length > 0) {
+                    selection.deleteFromDocument();
+                }
+
+                let input = document.createElement("input");
+                input.type = "text";
+                input.value = "";
+                selection.getRangeAt(0).insertNode(input);
+
+            } else {
+                // プルダウンリストを追加
+                let select = document.createElement("select");
+                select.id = "mySelect";
+                selection.getRangeAt(0).insertNode(select);
+
+                // 項目をoption要素としてselectに追加
+                selectedItems.forEach(item => {
+                    let option = document.createElement("option");
+                    option.textContent = item;
+                    select.appendChild(option);
+                });
+            }
+
+            let originalText = document.getElementById("content").innerText;
+            // 変更後の文章を取得
+            let modifiedText = document.getElementById("content").innerHTML;
+
+            // 差分用JSONデータ
+            let diffData = {
+                originalText: originalText,
+                modifiedText: modifiedText,
+                insertedElements: [
+                    {
+                        type: "input",
+                        id: "insertedInput",
+                        startOffset: startOffset,
+                        endOffset: endOffset
+                    },
+                    {
+                        type: "select",
+                        id: "insertedSelect",
+                        startOffset: startOffset,
+                        endOffset: endOffset
+                    }
+                ]
+            };
+
+            // localStorageに保存
+            localStorage.setItem("diffData", JSON.stringify(diffData));
+
+        }
+
+    });
+</script>
+
+</body>
+</html>

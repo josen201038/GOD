@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Selection Example</title>
+</head>
+<body>
+
+<div id="content">
+    <p>ここに長い文章を入れます。ユーザーはこの文章の一部をマウスでドラッグすることで選択できます。</p>
+    <p>2段落目も選択できるように用意します。</p>
+</div>
+
+<script>
+    document.addEventListener('mouseup', function(e) {
+        let selectedText = "";
+        if (window.getSelection) {
+            selectedText = window.getSelection().toString();
+        } else if (document.selection) {
+            selectedText = document.selection.createRange().text;
+        }
+
+        if (selectedText) {
+            alert(selectedText);
+        }
+    });
+</script>
+
+</body>
+</html>

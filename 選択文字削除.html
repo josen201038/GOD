@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Selection Remove Example</title>
+</head>
+<body>
+
+<div id="content">
+    <p>ここに長い文章を入れます。ユーザーはこの文章の一部をマウスでドラッグすることで選択できます。</p>
+</div>
+
+<script>
+    document.addEventListener('mouseup', function(e) {
+        let selection = window.getSelection();
+        if (selection.toString().length > 0) {
+            selection.deleteFromDocument();
+        }
+    });
+</script>
+
+</body>
+</html>

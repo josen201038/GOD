@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Textbox and List Example</title>
+</head>
+
+<body>
+
+<div id="content">
+    <p>ここに長い文章を入れます。</p>
+</div>
+
+<script>
+
+    document.addEventListener('mouseup', function(e) {
+
+        let selectedText = "";
+        if (window.getSelection) {
+            selectedText = window.getSelection().toString();
+        } else if (document.selection) {
+            selectedText = document.selection.createRange().text;
+        }
+
+        if (selectedText) {
+
+            let selectionType = prompt("テキストボックスなら1、リストなら2を選択");
+
+            if (selectionType == 1) {
+
+                // テキストボックスを作成
+                let input = document.createElement("input");
+                input.type = "text";
+                input.value = "";
+
+                // 選択テキストを削除してテキストボックスを挿入
+                let selection = window.getSelection();
+                selection.deleteFromDocument();
+                selection.getRangeAt(0).insertNode(input);
+
+            } else if (selectionType == 2) {
+
+                // プルダウンリストを作成
+                const selectedItems = prompt("項目をコンマで区切って入力してください").split(",");
+                let select = document.createElement("select");
+                select.id = "mySelect";
+
+                // 選択テキストを削除してプルダウンリストを挿入
+                let selection = window.getSelection();
+                selection.deleteFromDocument();
+                selection.getRangeAt(0).insertNode(select);
+
+                // option要素を追加
+                selectedItems.forEach(item => {
+                    let option = document.createElement("option");
+                    option.textContent = item;
+                    select.appendChild(option);
+                });
+
+            }
+
+        }
+
+    });
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Selection Remove Example</title>
+</head>
+<body>
+
+<div id="content">
+    <p>ここに長い文章を入れます。ユーザーはこの文章の一部をマウスでドラッグすることで選択できます。</p>
+    <p>2段落目も選択できるように用意します。</p>
+</div>
+
+<button onclick="undoDelete()">Undo Delete</button>
+
+<script>
+    let deletedTexts = [];
+
+    document.addEventListener('mouseup', function(e) {
+        let selection = window.getSelection();
+        if (selection.toString().length > 0) {
+            deletedTexts.push(selection.toString());
+            selection.deleteFromDocument();
+        }
+    });
+
+    function undoDelete() {
+        if (deletedTexts.length > 0) {
+            let lastDeleted = deletedTexts.pop();
+            let range = document.createRange();
+            range.selectNodeContents(document.body);
+            range.collapse(false);
+            let selection = window.getSelection();
+            let node = document.createTextNode(lastDeleted);
+            range.insertNode(node);
+            range.setStartAfter(node);
+            range.setEndAfter(node);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    }
+</script>
+
+</body>
+</html>

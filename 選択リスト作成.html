@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Dynamic Select Example</title>
+    <script>
+        window.onload = () => {
+            // アラートで選択項目を取得
+            const selectedItems = prompt("項目をコンマで区切って入力してください").split(",");
+
+            // プルダウンリスト(select要素)を取得
+            const selectEl = document.getElementById("mySelect");
+
+            // 選択した項目をoption要素としてselectに追加
+            selectedItems.forEach(item => {
+                const option = document.createElement("option");
+                option.textContent = item;
+
+                selectEl.appendChild(option);
+            });
+        }
+    </script>
+</head>
+
+<body>
+<select id="mySelect"></select>
+</body>
+
+</html>

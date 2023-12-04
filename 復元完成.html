@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Selection Remove and Restore Example</title>
+</head>
+<body>
+
+<div id="content">
+    <p>ここに長い文章を入れます。ユーザーはこの文章の一部をマウスでドラッグすることで選択できます。</p>
+</div>
+
+<button id="undo">Undo Delete</button>
+
+<ul id="deletes"></ul>
+
+<script>
+    let deletes = [];
+
+    document.addEventListener('mouseup', function(e) {
+        let selection = window.getSelection();
+        if(selection.toString().length > 0) {
+            let range = selection.getRangeAt(0);
+            let contents = selection.toString();
+            let start = range.startOffset;
+            let end = range.endOffset;
+
+            selection.deleteFromDocument();
+
+            deletes.push({
+                contents: contents,
+                start: start,
+                end: end
+            });
+
+            showDeletes();
+        }
+    });
+
+    function showDeletes() {
+        let html = '';
+        for(let i = 0; i < deletes.length; i++) {
+            html += '<li>' + deletes[i].contents + '</li>';
+        }
+        document.getElementById('deletes').innerHTML = html;
+    }
+
+    document.getElementById('undo').addEventListener('click', function() {
+        if(deletes.length > 0) {
+            let del = deletes.pop();
+            let p = document.querySelector('#content p');
+            p.textContent = p.textContent.substring(0, del.start) + del.contents + p.textContent.substring(del.start);
+        }
+        showDeletes();
+    });
+</script>
+
+</body>
+</html>

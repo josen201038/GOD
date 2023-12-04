@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Textbox Example</title>
+</head>
+<body>
+
+<div id="content">
+    <p>ここに長い文章を入れます。</p>
+</div>
+
+<script>
+    document.addEventListener('mouseup', function(e) {
+
+        let selectedText = "";
+
+        if (window.getSelection) {
+            selectedText = window.getSelection().toString();
+        } else if (document.selection) {
+            selectedText = document.selection.createRange().text;
+        }
+
+        if (selectedText) {
+
+            let selection = window.getSelection();
+            if (selection.toString().length > 0) {
+                selection.deleteFromDocument();
+            }
+
+            let input = document.createElement("input");
+            input.type = "text";
+            input.value = "";
+            selection.getRangeAt(0).insertNode(input);
+
+        }
+
+    });
+</script>
+
+</body>
+</html>

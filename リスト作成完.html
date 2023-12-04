@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Selection Example</title>
+</head>
+<body>
+
+<div id="content">
+    <p>ここに長い文章を入れます。ユーザーはこの文章の一部をマウスでドラッグすることで選択できます。</p>
+    <p>2段落目も選択できるように用意します。</p>
+</div>
+
+<script>
+
+    document.addEventListener('mouseup', function(e) {
+        let selectedText = "";
+        if (window.getSelection) {
+            selectedText = window.getSelection().toString();
+        } else if (document.selection) {
+            selectedText = document.selection.createRange().text;
+        }
+
+        if (selectedText) {
+            // アラートで項目を取得
+            const selectedItems = prompt("項目をコンマで区切って入力してください").split(",");
+
+            // 選択文字列を削除
+            let selection = window.getSelection();
+            if (selection.toString().length > 0) {
+                selection.deleteFromDocument();
+            }
+
+            // プルダウンリストを追加
+            let select = document.createElement("select");
+            select.id = "mySelect";
+            selection.getRangeAt(0).insertNode(select);
+
+            // 項目をoption要素としてselectに追加
+            selectedItems.forEach(item => {
+                let option = document.createElement("option");
+                option.textContent = item;
+                select.appendChild(option);
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Selection Example</title>
+</head>
+<body>
+
+<div id="content">
+    <p>ここに長い文章を入れます。ユーザーはこの文章の一部をマウスでドラッグすることで選択できます。</p>
+    <p>2段落目も選択できるように用意します。</p>
+</div>
+
+<script>
+    document.addEventListener('mouseup', function(e) {
+
+        // カスタムダイアログを作成
+        const dialog = document.createElement('div');
+
+        dialog.textContent = '項目をコンマで区切って入力してください';
+
+        const okButton = document.createElement('button');
+        okButton.textContent = 'OK';
+
+        const cancelButton = document.createElement('button');
+        cancelButton.textContent = 'キャンセル';
+
+        const extraButton = document.createElement('button');
+        extraButton.textContent = 'その他';
+
+        dialog.appendChild(okButton);
+        dialog.appendChild(cancelButton);
+        dialog.appendChild(extraButton);
+
+        document.body.appendChild(dialog);
+
+        okButton.addEventListener('click', () => {
+
+            // 項目を取得
+            const selectedItems = dialog.textContent.split(",");
+
+            // 選択文字列を削除
+            let selection = window.getSelection();
+            if (selection.toString().length > 0) {
+                selection.deleteFromDocument();
+            }
+
+            // プルダウンリストを追加
+            let select = document.createElement("select");
+            select.id = "mySelect";
+            selection.getRangeAt(0).insertNode(select);
+
+            // 項目をoption要素としてselectに追加
+            selectedItems.forEach(item => {
+                let option = document.createElement("option");
+                option.textContent = item;
+                select.appendChild(option);
+            });
+            // ダイアログを削除
+            document.body.removeChild(dialog);
+        });
+
+        cancelButton.addEventListener('click', () => {
+            // ダイアログを削除
+            document.body.removeChild(dialog);
+        });
+
+        cancelButton.addEventListener('click', () => {
+            // 選択解除
+            window.getSelection().removeAllRanges();
+            // ダイアログを削除
+            document.body.removeChild(dialog);
+
+        });
+    });
+</script>
+
+</body>
+</html>
