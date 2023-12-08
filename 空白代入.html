@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Text Selection</title>
+</head>
+<body>
+
+<p id="text">
+    この文章はテストです。選択してください。
+</p>
+
+<ul id="selections"></ul>
+
+<script>
+    let text = document.getElementById("text");
+    let selectionsList = document.getElementById("selections");
+
+    let fullText = text.textContent;
+
+    text.addEventListener("mouseup", onSelect);
+
+    function onSelect() {
+
+        // 選択したテキストを取得
+        let selection = window.getSelection().toString();
+
+        if (selection === "") return;
+
+        // 選択テキストの前後の文字列を取得
+        let start = fullText.indexOf(selection);
+        let before = fullText.slice(0, start);
+        let after = fullText.slice(start + selection.length);
+
+        // 選択テキストを削除した文字列を作成
+        let deleted = before + after;
+
+        // 削除した文字数と同じ数の空白文字を作成
+        let spaces = "　".repeat(selection.length);
+
+        // 文字列に空白文字を挿入
+        fullText = deleted.slice(0, start) + spaces + deleted.slice(start);
+
+        // テキスト要素に代入
+        text.textContent = fullText;
+
+        // その他の処理
+
+    }
+
+</script>
+
+</body>
+</html>
