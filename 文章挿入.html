@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Selection Remove and Restore</title>
+</head>
+<body>
+<h1>文章を挿入するコードの例</h1>
+<p id="original">これは元の文章です。</p>
+<input type="text" id="input" placeholder="文章,スタート,エンド">
+<button onclick="insertText()">挿入</button>
+
+<script>
+    function insertText() {
+        // テキストボックスの値を取得
+        const input = document.getElementById("input").value;
+        // カンマで分割して、文章と位置を配列に格納
+        const array = input.split(",");
+        // 配列の要素数が3でなければ、エラーメッセージを表示
+        if (array.length !== 3) {
+            alert("入力が正しくありません。文章とスタートとエンドの位置をカンマで区切って入力してください。");
+            return;
+        }
+        // 配列の要素を変数に代入
+        const text = array[0]; // 追加する文章
+        let start = parseInt(array[1]); // スタートの位置
+        let end = parseInt(array[2]); // エンドの位置
+        // スタートとエンドの位置が正の整数でなければ、エラーメッセージを表示
+        if (isNaN(start) || isNaN(end) || start < 0 || end < 0) {
+            alert("スタートとエンドの位置は正の整数で入力してください。");
+            return;
+        }
+        // 表示されている文章を取得
+        const original = document.getElementById("original").innerHTML;
+        // スタートとエンドの位置が文章の長さを超えていれば、エラーメッセージを表示
+        if (start > original.length || end > original.length) {
+            alert("スタートとエンドの位置は文章の長さ以下で入力してください。");
+            return;
+        }
+        // スタートとエンドの位置が逆転していれば、入れ替える
+        if (start > end) {
+            const temp = start;
+            start = end;
+            end = temp;
+        }
+        // 文章のスタートとエンドの位置に追加する文章を挿入
+        // ここで、スライスの第二引数を変更して、文字を削除しないようにする
+        const inserted = original.slice(0, start) + text + original.slice(start, end) + original.slice(end);
+        // 挿入された文章をアラートで表示
+        alert(inserted);
+    }
+</script>
+</body>
+</html>

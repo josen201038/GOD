@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Text Selection</title>
+</head>
+<body>
+
+<p id="text">
+    この文章はテストです。選択してください。
+</p>
+
+<ul id="selections"></ul>
+
+<script>
+    let text = document.getElementById("text");
+    let selectionsList = document.getElementById("selections");
+
+    let fullText = text.textContent;
+
+    text.addEventListener("mouseup", onSelect);
+
+    function onSelect() {
+        let selection = window.getSelection().toString();
+        if (selection === "") return;
+
+        let start = fullText.indexOf(selection);
+        let before = fullText.slice(0, start);
+        let selected = fullText.slice(start, start + selection.length);
+        let after = fullText.slice(start + selection.length);
+
+        fullText = before + '[' + selected + ']'  + after;
+
+        text.textContent = fullText;
+
+        let li = document.createElement("li");
+        li.textContent = `Selected: ${selected}`;
+
+        selectionsList.appendChild(li);
+    }
+
+</script>
+
+</body>
+</html>

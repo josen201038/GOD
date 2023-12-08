@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Selection Remove and Restore</title>
+</head>
+
+<body>
+
+<div id="content">
+    <p id="original">ここに長い文章を入れます。ユーザーはこの文章の一部をマウスでドラッグすることで選択できます。</p>
+</div>
+
+<button id="button" onclick="undoDelete()">Undo Delete</button>
+<button id="button2" onclick="finalize()">確定</button>
+
+<ul id="deletes"></ul>
+
+<script>
+    let originalText = document.getElementById("original").textContent;
+    let list = [];
+
+    document.addEventListener('mouseup', function() {
+        let selection = window.getSelection();
+        if (selection.toString().length > 0) {
+            let range = selection.getRangeAt(0);
+
+            list.push({
+                "old_p": document.querySelector('#content p').textContent,
+                "start": range.startOffset,
+                "end": range.endOffset,
+                "contents": selection.toString()
+            });
+
+            selection.deleteFromDocument();
+        }
+    });
+
+    function undoDelete() {
+        if (list.length > 0) {
+            const del = list.pop();
+            let text = document.getElementById("original").textContent;
+            document.getElementById("original").textContent = del.old_p;
+        }
+    }
+
+    function finalize() {
+        let result = [];
+        let lastPos = 0;
+        let firstPos = 0;
+        for (let i = 0; i < list.length; i++) {
+            let del = list[i];
+            result.push(originalText.substring(lastPos, del.start));
+            result.push(["<input type='text' value='" + del.contents + "' />"]);
+            if (i > 0) {
+                del.start += list[i-1].contents.length;
+                del.end += list[i-1].contents.length;
+            }
+            firstPos = del.start;
+            lastPos = del.end;
+        }
+        result.push(originalText.substring(lastPos));
+
+        document.getElementById("deletes").innerHTML = JSON.stringify(result);
+    }
+</script>
+</body>
+
+</html>

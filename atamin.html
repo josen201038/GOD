@@ -13,10 +13,11 @@
 <button id="button" onclick="button()">Undo Delete</button>
 <button id="button2" onclick="button2()">確定</button>
 
-<ul id="deletes"></ul>
+<ul id="selections"></ul>
 
 <script>
     let list = [];
+    const selectionsList = document.getElementById("selections");
 
     document.addEventListener('mouseup', function () {
         let selection = window.getSelection();
@@ -43,7 +44,11 @@
 
     function button2() {
         if (list.length > 0) {
-            console.log(JSON.stringify(list));
+            let newText = document.querySelector('#content p').textContent;
+            list.forEach(del => {
+                newText = newText.slice(0, del.start) + '<span>' + del.contents + '</span>' + newText.slice(del.end);
+            });
+            document.querySelector('#content p').innerHTML = newText;
         } else {
             alert("リストが空です")
         }

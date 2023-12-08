@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Selection Remove and Restore Example</title>
+</head>
+<body>
+
+<div id="content">
+    <p>ここに長い文章を入れます。ユーザーはこの文章の一部をマウスでドラッグすることで選択できます。</p>
+</div>
+
+<button id="undo">Undo Delete</button>
+
+<ul id="deletes"></ul>
+
+<script>
+
+    let deletes = [];
+
+    document.addEventListener('mouseup', function(e) {
+        // 選択文字取得・削除するコード
+        let selection = window.getSelection();
+        if(selection.toString().length > 0) {
+            let range = selection.getRangeAt(0);
+            let contents = selection.toString();
+            let start = range.startOffset;
+            let end = range.endOffset;
+
+            selection.deleteFromDocument();
+
+        // 文字と位置情報のオブジェクトを作成
+        let deleteObj = {
+            contents: contents,
+            start: start,
+            end: end
+        };
+
+        // オブジェクトを配列にプッシュ
+        deletes.push(deleteObj);
+
+        // ボタン作成
+        let button = document.createElement('button');
+        button.textContent = contents;
+        button.addEventListener('click', function() {
+            restoreDelete(deleteObj);
+        });
+
+        // ボタンを文書に追加
+        document.body.appendChild(button);
+
+    }
+
+    function restoreDelete(obj) {
+        // 文字を復元するコード
+        if (deletes.length > 0) {
+            let del = deletes.pop();
+            let p = document.querySelector('#content p');
+            p.textContent = p.textContent.substring(0, del.start) + del.contents + p.textContent.substring(del.start);
+        }
+        showDeletes();
+    }
+
+</script>
+
+</body>
+</html>

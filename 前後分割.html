@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Text Selection</title>
+</head>
+<body>
+
+<p id="text">この文字列を選択してください。前後で分割します。</p>
+
+<script>
+    const text = document.getElementById('text');
+
+    text.addEventListener('mouseup', function(e) {
+        const selectedText = window.getSelection().toString();
+
+        if (selectedText) {
+            const textBefore = e.target.textContent.slice(0, window.getSelection().anchorOffset);
+            const textAfter = e.target.textContent.slice(window.getSelection().focusOffset);
+
+            const parts = [textBefore, selectedText, textAfter];
+            console.log(parts);
+        }
+    });
+</script>
+
+</body>
+</html>
