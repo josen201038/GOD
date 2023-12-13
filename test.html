@@ -1,10 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
 <body>
-
+<textarea id="textArea"></textarea>
+<br>
+<button id="editButton" onclick="moveToEdit()">edit</button>
+<button id="highlightButton" onclick="highlightText()">ハイライト</button>
+<button id="generateTestButton" onclick="generateTest()">テストを生成</button>
+<div id="edit"></div>
+<div id="testContainer"></div>
+<div id="answer"></div>
+<div id="editContent"></div>
 </body>
+<script>
+    let editContent = '';
+    let ansList = [];
+
+    function moveToEdit() {
+        const textArea = document.getElementById('textArea');
+        editContent = textArea.value;
+        document.getElementById('edit').textContent = editContent;
+        textArea.value = '';
+    }
+
+    function highlightText() {
+        const editDiv = document.getElementById('edit');
+        const selectedText = window.getSelection().toString();
+        if (selectedText) {
+            // editContent用
+            editContent = editContent.replace(selectedText, `<startPos>[${list.length}:${selectedText}]<endPos>`);
+            // 回答用
+            ansList.push(selectedText);
+            // 表示用
+            editDiv.textContent = editContent.replace(selectedText, "");
+        }
+    }
+
+    function generateTest() {
+        const testText = editContent.replace(/<startPos>(.*?)<endPos>/g, '__');
+        document.getElementById('testContainer').innerHTML = '<p>テスト:</p><p>' + testText + '</p>';
+        document.getElementById('answer').innerHTML = '<p>回答:</p><p>' + ansList + '</p>';
+        document.getElementById('editContent').innerHTML = '<p>all:</p><p>' + editContent + '</p>';
+    }
+</script>
 </html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<textarea id="textArea" rows="10" cols="50"></textarea>
+<br>
+<button id="highlightButton">ハイライト</button>
+<button id="generateTestButton">テストを生成</button>
+<div id="testContainer"></div>
+</body>
+<script>
+    document.getElementById('highlightButton').addEventListener('click', function () {
+        var textArea = document.getElementById('textArea');
+        var selectedText = getSelectedText(textArea);
+        if (selectedText) {
+            var highlightedText = '<span class="highlight">' + selectedText + '</span>';
+            textArea.value = textArea.value.replace(selectedText, highlightedText);
+        }
+    });
+
+    function getSelectedText(textArea) {
+        var startPos = textArea.selectionStart;
+        var endPos = textArea.selectionEnd;
+        if (startPos !== endPos) {
+            return textArea.value.substring(startPos, endPos);
+        }
+        return null;
+    }
+
+    document.getElementById('generateTestButton').addEventListener('click', function () {
+        var textArea = document.getElementById('textArea');
+        var originalText = textArea.value;
+        var testText = originalText.replace(/<span class="highlight">(.*?)<\/span>/g, '__');
+
+        var testContainer = document.getElementById('testContainer');
+        testContainer.innerHTML = '<p>テスト:</p><p>' + testText + '</p>';
+
+        // ここで originalText を保存する方法が必要です (localStorage やサーバーに送信するなど)。
+    });
+
+    function gradeTest() {
+        var userAnswers = document.getElementById('testContainer').getElementsByTagName('input');
+        var originalText = document.getElementById('textArea').value;
+        var correctAnswers = originalText.match(/<span class="highlight">(.*?)<\/span>/g);
+        var score = 0;
+
+        for (var i = 0; i < userAnswers.length; i++) {
+            if (userAnswers[i].value === correctAnswers[i]) {
+                score++;
+            }
+        }
+
+        alert('スコア: ' + score + ' / ' + userAnswers.length);
+    }
+
+    // 採点ボタンを追加し、それをクリックした際に採点関数を呼び出します。
+    var testContainer = document.getElementById('testContainer');
+    testContainer.innerHTML += '<br><button id="gradeButton" onclick="gradeTest()">採点</button>';
+
+</script>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<textarea id="textArea" rows="10" cols="50"></textarea>
+<br>
+<button id="highlightButton" onclick="highlightButton()">ハイライト</button>
+<button id="generateTestButton" onclick="generateTestButton()">テストを生成</button>
+<button id="ks" onclick="ks()">ks</button>
+<div id="testContainer"></div>
+<div id="answer"></div>
+<div id="all"></div>
+</body>
+<script>
+    let all = ''
+    let list = []
+
+    function ks() {
+        all = document.getElementById('textArea').value;
+    }
+
+    function highlightButton() {
+        const textArea = document.getElementById('textArea');
+        const startPos = textArea.selectionStart;
+        const endPos = textArea.selectionEnd;
+        if (startPos !== endPos) {
+            const selectedText = textArea.value.substring(startPos, endPos);
+            // 表示用
+            textArea.value = textArea.value.replace(selectedText, '');
+            // all用
+            all = all.replace(selectedText, `<startPos>[${list.length}:${selectedText}]<endPos>`);
+            // 回答用
+            list.push(selectedText)
+        }
+    }
+
+    function generateTestButton() {
+        const testText = all.replace(/<startPos>(.*?)<endPos>/g, '__');
+        document.getElementById('testContainer').innerHTML = '<p>テスト:</p><p>' + testText + '</p>';
+        document.getElementById('answer').innerHTML = '<p>回答:</p><p>' + list + '</p>';
+        document.getElementById('all').innerHTML = '<p>all:</p><p>' + all + '</p>';
+    }
+</script>
+</html>
