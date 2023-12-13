@@ -2,9 +2,9 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>テストメーカー with 復元機能</title>
+    <title>テストメーカー</title>
     <style>
-        /* スタイルは必要に応じて調整 */
+        /* ここに必要なスタイルを追加 */
         #edit, #testContainer, #answer {
             border: 1px solid #ddd;
             margin: 10px 0;
@@ -17,10 +17,6 @@
 <button id="editButton" onclick="moveToEdit()">編集に移動</button>
 <button id="highlightButton" onclick="highlightText()">ハイライト</button>
 <button id="generateTestButton" onclick="generateTest()">テストを生成</button>
-<button id="saveButton" onclick="saveContent()">内容を保存</button>
-
-<select id="highlightedList"></select>
-<button id="restoreButton" onclick="restoreSelectedText()">選択した文字を復元</button>
 
 <div id="edit"></div>
 <div id="testContainer"></div>
@@ -43,7 +39,6 @@
         if (selectedText) {
             editContent = editContent.replace(selectedText, `<startPos>${ansList.length}:${selectedText}<endPos>`);
             ansList.push(selectedText);
-            updateHighlightedList();
             editDiv.textContent = editContent.replace(/<startPos>.*?<endPos>/g, "_");
         }
     }
@@ -53,36 +48,6 @@
         document.getElementById('testContainer').innerHTML = '<p>テスト:</p><p>' + testText + '</p>';
         document.getElementById('answer').innerHTML = '<p>回答:</p><p>' + ansList.join(', ') + '</p>';
     }
-
-    function saveContent() {
-        localStorage.setItem('editContent', editContent);
-        localStorage.setItem('ansList', JSON.stringify(ansList));
-    }
-
-    function restoreSelectedText() {
-        const selectedIndex = document.getElementById('highlightedList').selectedIndex;
-        const selectedText = ansList[selectedIndex];
-        document.getElementById('edit').textContent = editContent.replace(`<startPos>${selectedIndex}:${selectedText}<endPos>`, selectedText);
-        ansList.remove(selectedIndex);
-        updateHighlightedList();
-    }
-
-    function updateHighlightedList() {
-        const highlightedList = document.getElementById('highlightedList');
-        highlightedList.innerHTML = '';
-        ansList.forEach((item, index) => {
-            const option = document.createElement('option');
-            option.value = index;
-            option.textContent = item;
-            highlightedList.appendChild(option);
-        });
-    }
-
-    window.onload = function() {
-        editContent = localStorage.getItem('editContent') || '';
-        ansList = JSON.parse(localStorage.getItem('ansList')) || [];
-        updateHighlightedList();
-    };
 </script>
 </body>
 </html>
