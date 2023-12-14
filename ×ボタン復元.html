@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Maker Simulation</title>
+</head>
+<body>
+
+<p id="text">This is a sample text. You can select and replace any part of this text.</p>
+<button onclick="replaceText()">Replace Selected Text</button>
+
+<script>
+    function replaceText() {
+        const selection = window.getSelection();
+        const selectedText = selection.toString();
+
+        if (selectedText) {
+            const span = document.createElement('span');
+            const input = document.createElement('input');
+            const closeButton = document.createElement('button');
+
+            input.type = 'text';
+            closeButton.textContent = 'x';
+            closeButton.onclick = function() {
+                span.parentNode.replaceChild(document.createTextNode(selectedText), span);
+            };
+
+            span.appendChild(input);
+            span.appendChild(closeButton);
+
+            const range = selection.getRangeAt(0);
+            range.deleteContents();
+            range.insertNode(span);
+        }
+    }
+</script>
+
+</body>
+</html>

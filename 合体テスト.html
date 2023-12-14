@@ -12,7 +12,6 @@
 </div>
 
 <script>
-
     document.addEventListener('mouseup', function(e) {
 
         let selectedText = "";
@@ -23,46 +22,42 @@
         }
 
         if (selectedText) {
+            // アラートで項目を取得
+            const selectedItems = prompt("項目をコンマで区切って入力してください").split(",");
 
-            let selectionType = prompt("テキストボックスなら1、リストなら2を選択");
+            // 選択文字列を削除
+            let selection = window.getSelection();
+            if (selection.toString().length > 0) {
+                selection.deleteFromDocument();
+            }
 
-            if (selectionType == 1) {
+            if ( selectedItems == ""){
 
-                // テキストボックスを作成
+                let selection = window.getSelection();
+                if (selection.toString().length > 0) {
+                    selection.deleteFromDocument();
+                }
+
                 let input = document.createElement("input");
                 input.type = "text";
                 input.value = "";
-
-                // 選択テキストを削除してテキストボックスを挿入
-                let selection = window.getSelection();
-                selection.deleteFromDocument();
                 selection.getRangeAt(0).insertNode(input);
 
-            } else if (selectionType == 2) {
-
-                // プルダウンリストを作成
-                const selectedItems = prompt("項目をコンマで区切って入力してください").split(",");
+            } else {
+                // プルダウンリストを追加
                 let select = document.createElement("select");
                 select.id = "mySelect";
-
-                // 選択テキストを削除してプルダウンリストを挿入
-                let selection = window.getSelection();
-                selection.deleteFromDocument();
                 selection.getRangeAt(0).insertNode(select);
 
-                // option要素を追加
+                // 項目をoption要素としてselectに追加
                 selectedItems.forEach(item => {
                     let option = document.createElement("option");
                     option.textContent = item;
                     select.appendChild(option);
                 });
-
             }
-
         }
-
     });
-
 </script>
 
 </body>
