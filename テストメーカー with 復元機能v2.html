@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>テストメーカー with 復元機能</title>
+</head>
+<body>
+<textarea id="textArea"></textarea><br>
+<button id="editButton" onclick="moveToEdit()">編集に移動</button>
+<button id="highlightButton" onclick="highlightText()">ハイライト</button>
+<button id="generateTestButton" onclick="generateTest()">テストを生成</button>
+<select id="highlightedList"></select>
+<button id="restoreButton" onclick="restoreSelectedText()">選択した文字を復元</button>
+
+<div id="edit"></div>
+<div id="testContainer"></div>
+<div id="answer"></div>
+
+<script>
+    let editContent = '';
+    let ansList = [];
+
+    function moveToEdit() {
+        const textArea = document.getElementById('textArea');
+        editContent = textArea.value;
+        document.getElementById('edit').textContent = editContent;
+        textArea.value = '';
+    }
+
+    function highlightText() {
+        const editDiv = document.getElementById('edit');
+        const selectedText = window.getSelection().toString();
+        if (selectedText) {
+            editContent = editContent.replace(selectedText, `<startPos>${ansList.length}:${selectedText}<endPos>`);
+            ansList.push(selectedText);
+            updateHighlightedList();
+            editDiv.textContent = editContent.replace(/<startPos>.*?<endPos>/g, "_");
+        }
+    }
+
+    function generateTest() {
+        const testText = editContent.replace(/<startPos>.*?<endPos>/g, '__');
+        document.getElementById('testContainer').innerHTML = '<p>テスト:</p><p>' + testText + '</p>';
+        document.getElementById('answer').innerHTML = '<p>回答:</p><p>' + ansList.join(', ') + '</p>';
+    }
+
+    function restoreSelectedText() {
+        const selectedIndex = document.getElementById('highlightedList').selectedIndex;
+        const selectedText = ansList[selectedIndex];
+        document.getElementById('edit').textContent = editContent.replace(`<startPos>${selectedIndex}:${selectedText}<endPos>`, selectedText);
+        ansList.splice(selectedIndex, 1);
+        updateHighlightedList();
+    }
+
+    function updateHighlightedList() {
+        const highlightedList = document.getElementById('highlightedList');
+        highlightedList.innerHTML = '';
+        ansList.forEach((item, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.text = item;
+            highlightedList.appendChild(option);
+        });
+    }
+
+    window.onload = function() {
+        editContent = localStorage.getItem('editContent') || '';
+        ansList = JSON.parse(localStorage.getItem('ansList')) || [];
+        updateHighlightedList();
+    };
+</script>
+</body>
+</html>

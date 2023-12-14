@@ -32,8 +32,8 @@
         const range = selection.getRangeAt(0);
         const selectedText = range.toString();
         const replaceText = `<startPos>${ansList.length}:${selectedText}<endPos>`;
-        const testText = editContent.replace(/<startPos>.*?<endPos>/g, '');
-        editContent = testText.substring(0, range.startOffset) + replaceText + testText.substring(range.endOffset);
+        // 2回目以降の削除で、lengthが変わっているので、位置がずれる
+        editContent = editContent.substring(0, range.startOffset) + replaceText + editContent.substring(range.endOffset);
         ansList.push(selectedText);
         updateElements();
     }
@@ -47,14 +47,13 @@
     function restoreSelectedText() {
         const selectedIndex = document.getElementById('highlightedList').selectedIndex;
         const selectedText = ansList[selectedIndex];
-        const replaceText = `<startPos>${selectedIndex}:${selectedText}<endPos>`;
-        editContent = editContent.replace(replaceText, selectedText);
+        editContent = editContent.replace(`<startPos>${selectedIndex}:${selectedText}<endPos>`, selectedText);
         ansList.splice(selectedIndex, 1);
         updateElements();
     }
 
     function updateElements() {
-        document.getElementById('edit').textContent = editContent.replace(/<startPos>.*?<endPos>/g, '');
+        document.getElementById('edit').textContent = editContent.replace(/<startPos>.*?<endPos>/g, "_");
         document.getElementById('highlightedList').innerHTML = ansList.map((item, index) => `<option value="${index}">${item}</option>`).join('');
     }
 </script>

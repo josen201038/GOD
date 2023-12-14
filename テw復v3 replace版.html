@@ -27,15 +27,13 @@
     }
 
     function highlightText() {
-        const selection = window.getSelection();
-        if (!selection.rangeCount) return;
-        const range = selection.getRangeAt(0);
-        const selectedText = range.toString();
-        const replaceText = `<startPos>${ansList.length}:${selectedText}<endPos>`;
-        const testText = editContent.replace(/<startPos>.*?<endPos>/g, '');
-        editContent = testText.substring(0, range.startOffset) + replaceText + testText.substring(range.endOffset);
-        ansList.push(selectedText);
-        updateElements();
+        const selectedText = window.getSelection().toString();
+        if (selectedText) {
+            // 一番最初の文字が置き換えられてしまう。
+            editContent = editContent.replace(selectedText, `<startPos>${ansList.length}:${selectedText}<endPos>`);
+            ansList.push(selectedText);
+            updateElements();
+        }
     }
 
     function generateTest() {
@@ -47,14 +45,13 @@
     function restoreSelectedText() {
         const selectedIndex = document.getElementById('highlightedList').selectedIndex;
         const selectedText = ansList[selectedIndex];
-        const replaceText = `<startPos>${selectedIndex}:${selectedText}<endPos>`;
-        editContent = editContent.replace(replaceText, selectedText);
+        editContent = editContent.replace(`<startPos>${selectedIndex}:${selectedText}<endPos>`, selectedText);
         ansList.splice(selectedIndex, 1);
         updateElements();
     }
 
     function updateElements() {
-        document.getElementById('edit').textContent = editContent.replace(/<startPos>.*?<endPos>/g, '');
+        document.getElementById('edit').textContent = editContent.replace(/<startPos>.*?<endPos>/g, "_");
         document.getElementById('highlightedList').innerHTML = ansList.map((item, index) => `<option value="${index}">${item}</option>`).join('');
     }
 </script>
