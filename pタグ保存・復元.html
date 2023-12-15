@@ -10,18 +10,15 @@
 <p id="text">『VALORANT』は、ライアットゲームズが開発・運営している<span><input type="text"><button>x</button></span>合衆国のファーストパーソン・シューティングゲーム である。<span><select><option>aaa</option><option>bbb</option><option>ccc</option></select><button>x</button></span>による初のFPSジャンルの作品であり、2020年6月2日にMicrosoft Windows向けに基本プレイ無料でリリースされた。</p>
 <p id="json"></p>
 <script>
-    let jsonString = null;
-    let restoredPTag = null;
+    let jsonString = "";
 
     // HTMLからJSONに保存
     function htmlToJSON() {
-        const pTag = document.querySelector("#text");
-        const json = {
+        jsonString = JSON.stringify({
             tag: "p",
             id: "text",
-            content: pTag.innerHTML,
-        };
-        jsonString = JSON.stringify(json);
+            content: document.querySelector("#text").innerHTML,
+        });
         console.log(jsonString);
     }
 
@@ -31,9 +28,8 @@
         const pTag = document.createElement(json.tag);
         pTag.id = json.id;
         pTag.innerHTML = json.content;
-        restoredPTag = pTag;
         // 作成したp要素をDOMに追加
-        document.querySelector("#json").appendChild(restoredPTag);
+        document.querySelector("#json").appendChild(pTag);
     }
 </script>
 </body>
