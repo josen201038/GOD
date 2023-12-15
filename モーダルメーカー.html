@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Editable Options Modal</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- Button to Open the Modal -->
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#optionsModal">
+    オプションを編集
+</button>
+
+<!-- The Modal -->
+<div class="modal fade" id="optionsModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h5 class="modal-title">オプションの編集</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <!-- Modal body -->
+            <div class="modal-body">
+                <form id="optionsForm">
+                    <div id="optionsInputs">
+                        <div class="form-group">
+                            <label>選択肢1:</label>
+                            <input type="text" class="form-control option-input" value="選択肢1">
+                        </div>
+                        <div class="form-group">
+                            <label>選択肢2:</label>
+                            <input type="text" class="form-control option-input" value="選択肢2">
+                        </div>
+                        <div class="form-group">
+                            <label>選択肢3:</label>
+                            <input type="text" class="form-control option-input" value="選択肢3">
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-success" onclick="addOption()">選択肢を追加</button>
+                </form>
+            </div>
+
+            <!-- Modal footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="updateOptions()">保存</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">閉じる</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Display the Dropdown -->
+<select id="optionsDropdown" class="form-control">
+</select>
+
+<!-- jQuery and Bootstrap Bundle (includes Popper) -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script>
+    function addOption() {
+        $('#optionsInputs').append(
+            `<div class="form-group">
+                <label>新しい選択肢:</label>
+                <input type="text" class="form-control option-input" placeholder="新しい選択肢">
+            </div>`
+        );
+    }
+
+    function updateOptions() {
+        const options = [];
+        $('.option-input').each(function () {
+            const value = $(this).val();
+            if (value) {
+                options.push(value);
+            }
+        });
+
+        // Clear the current options and add new ones
+        const $dropdown = $('#optionsDropdown');
+        $dropdown.empty();
+        options.forEach(option => {
+            $dropdown.append(`<option>${option}</option>`);
+        });
+
+        // Close the modal
+        $('#optionsModal').modal('hide');
+    }
+</script>
+
+</body>
+</html>

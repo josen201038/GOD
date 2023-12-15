@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Maker Simulation</title>
+</head>
+<body>
+<textarea id="textArea"></textarea><br>
+<button onclick="moveToEdit()">編集に移動</button>
+<button onclick="replaceText()">問題作成</button>
+<button onclick="generateTest()">テスト生成</button>
+<p id="text"></p>
+<div id="testContainer"></div>
+<div id="answer"></div>
+
+<script>
+    let jsonString = "";
+    let ansList = [];
+
+    // 編集に移動ボタンがクリックされたときの処理
+    function moveToEdit() {
+        // <textarea> 要素を取得
+        const textArea = document.getElementById('textArea');
+        // <p> 要素を取得
+        const textElement = document.getElementById('text');
+
+        // <textarea> の値を取得して <p> 要素にセット
+        textElement.textContent = textArea.value;
+    }
+
+    // テキストの置換を行う関数
+    function replaceText() {
+        // ユーザーが選択したテキストを取得
+        const selection = window.getSelection();
+        const selectedText = selection.toString();
+
+        if (!selectedText) return;
+
+        ansList.push(selectedText);
+
+        // ユーザーにテキストまたはコンマ区切りのリストを入力してもらう
+        const userInput = prompt("コンマ区切りのリストを入力してください。");
+
+        // 置換用の要素を作成
+        const span = document.createElement('span');
+        const closeButton = document.createElement('button');
+        closeButton.textContent = 'x';
+        closeButton.onclick = function () {
+            // ユーザーが作成した要素を元のテキストに置換
+            span.parentNode.replaceChild(document.createTextNode(selectedText), span);
+            ansList = ansList.filter(item => item !== selectedText);
+        };
+
+        if (userInput === "") {
+            // ユーザーが空文字を入力した場合、テキストボックスを作成
+            const input = document.createElement('input');
+            input.type = 'text';
+            span.appendChild(input);
+        } else {
+            // ユーザーが空文字でない場合、プルダウンリストを作成
+            const select = document.createElement('select');
+            userInput.split(",").forEach(item => {
+                const option = document.createElement('option');
+                option.textContent = item;
+                select.appendChild(option);
+            });
+            span.appendChild(select);
+        }
+
+        // 選択したテキストを置換用の要素に挿入
+        span.appendChild(closeButton);
+
+        // テキストを選択範囲に置換
+        const range = selection.getRangeAt(0);
+        range.deleteContents();
+        range.insertNode(span);
+    }
+
+
+    // テストを生成する関数
+    function generateTest() {
+        // テスト保存
+        jsonString = document.querySelector("#text").innerHTML
+        // テスト復元
+        document.getElementById('testContainer').innerHTML = jsonString;
+        document.getElementById('answer').innerHTML = `<p>回答:</p><p>${ansList.join(', ')}</p>`;
+    }
+</script>
+
+</body>
+</html>
