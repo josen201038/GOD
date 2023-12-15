@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Maker Simulation</title>
+    <!-- Bootstrap CSS の読み込み -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<textarea id="textArea"></textarea><br>
+<button onclick="moveToEdit()">編集に移動</button>
+<button onclick="generateTest()">テスト生成</button>
+<p id="text"></p>
+<div id="testContainer"></div>
+<div id="answer"></div>
+
+<!-- モーダルのHTMLマークアップ -->
+<div class="modal" id="replaceModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">テキストの置換オプション</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="optionsForm">
+                    <div id="optionsInputs">
+                    </div>
+                    <button type="button" class="btn btn-success" onclick="addOption()">選択肢を追加</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="createListButton" type="button" class="btn btn-primary">リストの作成</button>
+                <button id="createTextboxButton" type="button" class="btn btn-secondary">テキストボックス作成</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">キャンセル</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script>
+    let jsonString = "";
+    let ansList = [];
+
+    // 編集に移動ボタンがクリックされたときの処理
+    function moveToEdit() {
+        // <textarea> 要素を取得
+        const textArea = document.getElementById('textArea');
+        // <p> 要素を取得
+        const textElement = document.getElementById('text');
+
+        // <textarea> の値を取得して <p> 要素にセット
+        textElement.textContent = textArea.value;
+    }
+
+    function addOption() {
+        $('#optionsInputs').append(
+            `<div class="form-group">
+                <label>新しい選択肢:</label>
+                <input type="text" class="form-control option-input" placeholder="新しい選択肢">
+            </div>`
+        );
+    }
+
+    // プルダウンリストを更新する関数
+    function updateSelectList() {
+        const options = [];
+        $('.option-input').each(function () {
+            const value = $(this).val();
+            if (value) {
+                options.push(value);
+            }
+        });
+        // 選択肢のリストを返す
+        return options;
+    }
+
+    // 選択テキストを置換するためのモーダルを表示する関数
+    function showReplaceModal(selection) {
+        // モーダルを表示する
+        $('#replaceModal').modal('show');
+
+        // リスト作成ボタンのイベントハンドラ
+        document.getElementById('createListButton').onclick = function () {
+            const options = updateSelectList();
+            createSelectList(substitution(selection), options);
+            $('#replaceModal').modal('hide');
+        };
+
+
+        // テキストボックス作成ボタンのイベントハンドラ
+        document.getElementById('createTextboxButton').onclick = function () {
+            // テキストの置換を行ってテキストボックスを作成する
+            createInputBox(substitution(selection));
+            $('#replaceModal').modal('hide');
+            substitution();
+        };
+    }
+
+    // プルダウンリストを作成する関数
+    function createSelectList(span, options) {
+        const select = document.createElement('select');
+        // 例として、選択肢を静的に追加します。
+        options.forEach(item => {
+            const option = document.createElement('option');
+            option.textContent = item;
+            select.appendChild(option);
+        });
+        span.appendChild(select);
+    }
+
+    // テキストボックスを作成する関数
+    function createInputBox(span) {
+        const input = document.createElement('input');
+        input.type = 'text';
+        span.appendChild(input);
+    }
+
+    // テキストの置換を行う関数
+    function substitution(selection) {
+        const selectedText = selection.toString();
+
+        ansList.push(selectedText);
+
+        // 現在選択されているspan要素を保持するための変数
+        const currentSpan = document.createElement('span');
+        const closeButton = document.createElement('button');
+        closeButton.textContent = 'x';
+        closeButton.onclick = function () {
+            // ユーザーが作成した要素を元のテキストに置換
+            currentSpan.parentNode.replaceChild(document.createTextNode(selectedText), currentSpan);
+            ansList = ansList.filter(item => item !== selectedText);
+        };
+
+        // 選択したテキストを置換用の要素に挿入
+        currentSpan.appendChild(closeButton);
+
+        // 選択したテキストの置換を待機
+        const range = selection.getRangeAt(0);
+        range.deleteContents();
+        range.insertNode(currentSpan);
+
+        return currentSpan;
+    }
+
+    //　ドラッグされたときの処理
+    document.addEventListener('mouseup', function () {
+        // ユーザーが選択したテキストを取得
+        const selection = window.getSelection();
+        if (!selection.toString()) return;
+        // モーダル表示の関数を呼び出す
+        showReplaceModal(selection);
+    });
+
+    // テストを生成する関数
+    function generateTest() {
+        // <p> 要素のHTMLを取得
+        const textHTML = document.querySelector("#text").innerHTML;
+
+        // テスト保存
+        jsonString = textHTML.replace(/<button[^>]*>x<\/button>/g, '');
+
+        // テスト復元
+        document.getElementById('testContainer').innerHTML = `<p>テスト:</p><p>${jsonString}</p>`;
+        document.getElementById('answer').innerHTML = `<p>回答:</p><p>${ansList.join(', ')}</p>`;
+    }
+</script>
+</body>
+</html>
