@@ -14,6 +14,7 @@
 <div id="answer"></div>
 
 <script>
+    let jsonString = "";
     let ansList = [];
 
     // 編集に移動ボタンがクリックされたときの処理
@@ -78,7 +79,10 @@
 
     // テストを生成する関数
     function generateTest() {
-        document.getElementById('testContainer').innerHTML = `<p>テスト:</p><p>${document.getElementById('text').textContent}</p>`;
+        // テスト保存
+        jsonString = document.querySelector("#text").innerHTML
+        // テスト復元
+        document.getElementById('testContainer').innerHTML = jsonString;
         document.getElementById('answer').innerHTML = `<p>回答:</p><p>${ansList.join(', ')}</p>`;
     }
 </script>
