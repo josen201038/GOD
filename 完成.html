@@ -7,7 +7,6 @@
 <body>
 <textarea id="textArea"></textarea><br>
 <button onclick="moveToEdit()">編集に移動</button>
-<button onclick="replaceText()">問題作成</button>
 <button onclick="generateTest()">テスト生成</button>
 <p id="text"></p>
 <div id="testContainer"></div>
@@ -29,7 +28,7 @@
     }
 
     // テキストの置換を行う関数
-    function replaceText() {
+    document.addEventListener('mouseup', function() {
         // ユーザーが選択したテキストを取得
         const selection = window.getSelection();
         const selectedText = selection.toString();
@@ -74,17 +73,23 @@
         const range = selection.getRangeAt(0);
         range.deleteContents();
         range.insertNode(span);
-    }
+    });
 
 
     // テストを生成する関数
     function generateTest() {
+        // <p> 要素のHTMLを取得
+        const textHTML = document.querySelector("#text").innerHTML;
+
         // テスト保存
-        jsonString = document.querySelector("#text").innerHTML
+        jsonString = textHTML.replace(/<button[^>]*>x<\/button>/g, '');
+
         // テスト復元
-        document.getElementById('testContainer').innerHTML = jsonString;
+        document.getElementById('testContainer').innerHTML = `<p>テスト:</p><p>${jsonString}</p>`;
         document.getElementById('answer').innerHTML = `<p>回答:</p><p>${ansList.join(', ')}</p>`;
     }
+
+
 </script>
 
 </body>

@@ -2,61 +2,110 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>テストメーカー with 復元機能</title>
+    <title>Test Maker Simulation</title>
 </head>
 <body>
 <textarea id="textArea"></textarea><br>
 <button onclick="moveToEdit()">編集に移動</button>
-<button onclick="highlightText()">ハイライト</button>
-<button onclick="generateTest()">テストを生成</button>
-<select id="highlightedList"></select>
-<button onclick="restoreSelectedText()">選択した文字を復元</button>
-
-<div id="edit"></div>
+<button onclick="generateTest()">テスト生成</button>
+<p id="text"></p>
 <div id="testContainer"></div>
 <div id="answer"></div>
+<form id="addToListForm">
+    <input type="text" id="newListItem" placeholder="項目を追加"/>
+    <button type="button" onclick="addToList()">追加</button>
+</form>
 
 <script>
-    let editContent = '';
+    let jsonString = "";
     let ansList = [];
 
+    // 編集に移動ボタンがクリックされたときの処理
     function moveToEdit() {
-        editContent = document.getElementById('textArea').value;
-        document.getElementById('textArea').value = '';
-        updateElements();
+        // <textarea> 要素を取得
+        const textArea = document.getElementById('textArea');
+        // <p> 要素を取得
+        const textElement = document.getElementById('text');
+
+        // <textarea> の値を取得して <p> 要素にセット
+        textElement.textContent = textArea.value;
     }
 
-    function highlightText() {
+    function addToList() {
+        const newItem = document.getElementById('newListItem').value;
+        if (newItem) {
+            // 新しい選択肢をansListに追加
+            ansList.push(newItem);
+
+            // フォームの入力フィールドをクリア
+            document.getElementById('newListItem').value = '';
+        }
+    }
+
+    // テキストの置換を行う関数
+    document.addEventListener('mouseup', function() {
+        // ユーザーが選択したテキストを取得
         const selection = window.getSelection();
-        if (!selection.rangeCount) return;
-        const range = selection.getRangeAt(0);
-        const selectedText = range.toString();
-        const replaceText = `<startPos>${ansList.length}:${selectedText}<endPos>`;
-        const testText = editContent.replace(/<startPos>.*?<endPos>/g, '');
-        editContent = testText.substring(0, range.startOffset) + replaceText + testText.substring(range.endOffset);
-        ansList.push(selectedText);
-        updateElements();
-    }
+        const selectedText = selection.toString();
 
+        if (!selectedText) return;
+
+        ansList.push(selectedText);
+
+        // ユーザーにテキストまたはコンマ区切りのリストを入力してもらう
+        const userInput = prompt("コンマ区切りのリストを入力してください。");
+
+        // 置換用の要素を作成
+        const span = document.createElement('span');
+        const closeButton = document.createElement('button');
+        closeButton.textContent = 'x';
+        closeButton.onclick = function () {
+            // ユーザーが作成した要素を元のテキストに置換
+            span.parentNode.replaceChild(document.createTextNode(selectedText), span);
+            ansList = ansList.filter(item => item !== selectedText);
+        };
+
+        if (userInput === "") {
+            // ユーザーが空文字を入力した場合、テキストボックスを作成
+            const input = document.createElement('input');
+            input.type = 'text';
+            span.appendChild(input);
+        } else {
+            // ユーザーが空文字でない場合、プルダウンリストを作成
+            const select = document.createElement('select');
+            userInput.split(",").forEach(item => {
+                const option = document.createElement('option');
+                option.textContent = item;
+                select.appendChild(option);
+            });
+            span.appendChild(select);
+        }
+
+        // 選択したテキストを置換用の要素に挿入
+        span.appendChild(closeButton);
+
+        // テキストを選択範囲に置換
+        const range = selection.getRangeAt(0);
+        range.deleteContents();
+        range.insertNode(span);
+    });
+
+
+    // テストを生成する関数
     function generateTest() {
-        const testText = editContent.replace(/<startPos>.*?<endPos>/g, '__');
-        document.getElementById('testContainer').innerHTML = `<p>テスト:</p><p>${testText}</p>`;
+        // <p> 要素のHTMLを取得
+        const textHTML = document.querySelector("#text").innerHTML;
+
+        // テスト保存
+        jsonString = textHTML.replace(/<button[^>]*>x<\/button>/g, '');
+
+        // テスト復元
+        document.getElementById('testContainer').innerHTML = `<p>テスト:</p><p>${jsonString}</p>`;
         document.getElementById('answer').innerHTML = `<p>回答:</p><p>${ansList.join(', ')}</p>`;
     }
 
-    function restoreSelectedText() {
-        const selectedIndex = document.getElementById('highlightedList').selectedIndex;
-        const selectedText = ansList[selectedIndex];
-        const replaceText = `<startPos>${selectedIndex}:${selectedText}<endPos>`;
-        editContent = editContent.replace(replaceText, selectedText);
-        ansList.splice(selectedIndex, 1);
-        updateElements();
-    }
 
-    function updateElements() {
-        document.getElementById('edit').textContent = editContent.replace(/<startPos>.*?<endPos>/g, '');
-        document.getElementById('highlightedList').innerHTML = ansList.map((item, index) => `<option value="${index}">${item}</option>`).join('');
-    }
 </script>
+
 </body>
 </html>
