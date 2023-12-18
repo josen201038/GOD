@@ -47,6 +47,8 @@
 <script>
     let jsonString = "";
     let ansList = [];
+    let currentSelectionRange = null; // 現在の選択範囲を保存するための変数
+    let currentSelectionText = null; // 現在の選択textを保存するための変数
 
     // 編集に移動ボタンがクリックされたときの処理
     function moveToEdit() {
@@ -55,6 +57,8 @@
         // <p> 要素を取得
         const textElement = document.getElementById('text');
 
+        // リストのリセット
+        ansList = [];
         // <textarea> の値を取得して <p> 要素にセット
         textElement.textContent = textArea.value;
     }
@@ -83,13 +87,16 @@
 
     // 選択テキストを置換するためのモーダルを表示する関数
     function showReplaceModal(selection) {
+        // 現在の選択を保存
+        currentSelectionRange = selection.getRangeAt(0).cloneRange();
+        currentSelectionText = selection.toString()
+
         // モーダルを表示する
         $('#replaceModal').modal('show');
 
         // リスト作成ボタンのイベントハンドラ
         document.getElementById('createListButton').onclick = function () {
-            const options = updateSelectList();
-            createSelectList(substitution(selection), options);
+            createSelectList(substitution(selection), updateSelectList());
             $('#replaceModal').modal('hide');
         };
 
@@ -99,7 +106,6 @@
             // テキストの置換を行ってテキストボックスを作成する
             createInputBox(substitution(selection));
             $('#replaceModal').modal('hide');
-            substitution();
         };
     }
 
@@ -126,7 +132,7 @@
     function substitution(selection) {
         const selectedText = selection.toString();
 
-        ansList.push(selectedText);
+        ansList.push(currentSelectionText);
 
         // 現在選択されているspan要素を保持するための変数
         const currentSpan = document.createElement('span');
@@ -134,7 +140,7 @@
         closeButton.textContent = 'x';
         closeButton.onclick = function () {
             // ユーザーが作成した要素を元のテキストに置換
-            currentSpan.parentNode.replaceChild(document.createTextNode(selectedText), currentSpan);
+            currentSpan.parentNode.replaceChild(document.createTextNode(currentSelectionText), currentSpan);
             ansList = ansList.filter(item => item !== selectedText);
         };
 
@@ -142,7 +148,7 @@
         currentSpan.appendChild(closeButton);
 
         // 選択したテキストの置換を待機
-        const range = selection.getRangeAt(0);
+        const range = currentSelectionRange.cloneRange();
         range.deleteContents();
         range.insertNode(currentSpan);
 
