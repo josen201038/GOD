@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>テキスト移動デモ</title>
+    <style>
+        #output {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            white-space: pre-wrap; /* これにより、改行と空白が適切に扱われる */
+        }
+    </style>
+</head>
+<body>
+<textarea id="inputText" rows="4" cols="50"></textarea>
+<br>
+<button id="moveButton">テキストを移動</button>
+<div id="output"></div>
+
+<script>
+    document.getElementById('moveButton').addEventListener('click', function() {
+        var inputText = document.getElementById('inputText').value;
+        // HTMLタグをエスケープする
+        var escapedText = inputText.replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+        // 改行文字を <br> タグに置き換える
+        var formattedText = escapedText.replace(/\n/g, '<br>');
+        document.getElementById('output').innerHTML = formattedText;
+    });
+</script>
+</body>
+</html>
