@@ -29,7 +29,7 @@
     </style>
 </head>
 <body>
-<textarea id="textArea" rows="10" cols="50"></textarea><br>
+<textarea id="textArea"></textarea><br>
 <button onclick="moveToEdit()">編集に移動</button>
 <button onclick="generateTest()">テスト生成</button>
 <p id="text"></p>
@@ -78,17 +78,8 @@
     function moveToEdit() {
         // リストのリセット
         ansData = {};
-
-        // <textarea> から値を取得し、HTMLの特殊文字をエスケープする。
-        const escapedText = document.getElementById('textArea').value
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-
-        // 改行を <br> に置き換えて、処理したテキストを <p> 要素に設定する
-        document.getElementById('text').innerHTML = escapedText.replace(/\n/g, '<br>');
+        // <textarea> の値を取得して、改行を <br> に置き換えて <p> 要素にセット
+        document.getElementById('text').textContent = document.getElementById('textArea').value.replace(/\n/g, '<br>');
     }
 
     function addOption() {
