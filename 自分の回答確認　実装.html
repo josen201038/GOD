@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Maker Simulation</title>
+    <!-- Bootstrap CSS の読み込み -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        #text {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            white-space: pre-wrap; /* これにより、改行と空白が適切に扱われる */
+        }
+
+        #testContainer {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            white-space: pre-wrap;
+        }
+
+        #answer {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+<textarea id="textArea"></textarea><br>
+<button onclick="moveToEdit()">編集に移動</button>
+<button onclick="generateTest()">テスト生成</button>
+<p id="text"></p>
+<div id="testContainer"></div>
+<div id="answer"></div>
+
+<!-- 答案表示ボタンを追加 -->
+<button id="showAnswersButton">答案表示</button>
+<!-- 答案を表示するためのエリア -->
+<div id="answersDisplay" style="margin-top: 20px; border: 1px solid #ccc; padding: 10px; white-space: pre-wrap;"></div>
+
+<!-- モーダルのHTMLマークアップ -->
+<div class="modal" id="replaceModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">テキストの置換オプション</h5>
+            </div>
+            <div class="modal-body">
+                <form id="optionsForm">
+                    <div id="optionsInputs">
+                    </div>
+                    <button type="button" class="btn btn-success" onclick="addOption()">選択肢を追加</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="createListButton()">リストの作成</button>
+                <button type="button" class="btn btn-secondary" onclick="createTextboxButton()">テキストボックス作成
+                </button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">キャンセル</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script>
+    let testData = "";
+    let spanId = 0;
+    let ansData = {};
+    let currentSelectionRange = null; // 現在の選択範囲を保存するための変数
+    let currentSelectionText = null; // 現在の選択textを保存するための変数
+
+    // 採点結果と回答を保存するための変数
+    let gradingResults = {
+        score: 0,
+        answers: []
+    };
+
+    // 編集に移動ボタンがクリックされたときの処理
+    function moveToEdit() {
+        // リストのリセット
+        ansData = {};
+
+        // <textarea> から値を取得し、HTMLの特殊文字をエスケープする。
+        const escapedText = document.getElementById('textArea').value
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+
+        // 改行を <br> に置き換えて、処理したテキストを <p> 要素に設定する
+        document.getElementById('text').innerHTML = escapedText.replace(/\n/g, '<br>');
+    }
+
+    function addOption() {
+        $('#optionsInputs').append(
+            `<div class="form-group">
+                <label>新しい選択肢:</label>
+                <input type="text" class="form-control option-input" placeholder="新しい選択肢">
+            </div>`
+        );
+    }
+
+    // プルダウンリストを更新する関数
+    function updateSelectList() {
+        const options = [];
+        $('.option-input').each(function () {
+            const value = $(this).val();
+            if (value) {
+                options.push(value);
+            }
+        });
+        // 選択肢のリストを返す
+        return options;
+    }
+
+    // リスト作成ボタンのイベントハンドラ
+    function createListButton() {
+        // テキストの置換を行ってプルダウンリストを作成する
+        const select = document.createElement('select');
+        // 選択肢を追加する。
+        updateSelectList().forEach(item => {
+            const option = document.createElement('option');
+            option.textContent = item;
+            select.appendChild(option);
+        });
+        // ×ボタンにプルダウンリストを追加
+        substitution().appendChild(select);
+        // モーダルを非表示にする
+        $('#replaceModal').modal('hide');
+    }
+
+    // テキストボックス作成ボタンのイベントハンドラ
+    function createTextboxButton() {
+        // テキストの置換を行ってテキストボックスを作成する
+        const input = document.createElement('input');
+        input.type = 'text';
+        // ×ボタンにテキストボックスを追加
+        substitution().appendChild(input);
+        // モーダルを非表示にする
+        $('#replaceModal').modal('hide');
+    }
+
+    // テキストをspanに置換して、×ボタンを追加する関数
+    function substitution() {
+        // 回答追加
+        ansData[spanId] = currentSelectionText;
+
+        // 現在選択されているspan要素を保持するための変数
+        const span = document.createElement('span');
+
+        // spanにindex追加
+        span.setAttribute('span-id', spanId++);
+
+        // ×ボタン作成
+        const closeButton = document.createElement('button');
+        closeButton.textContent = 'x';
+        // ×ボタンに復元機能を付与する
+        closeButton.onclick = function () {
+            // spanのindex取得
+            const index = parseInt(span.getAttribute('span-id'));
+            // ユーザーが作成した要素を元のテキストに置換
+            span.parentNode.replaceChild(document.createTextNode(ansData[index]), span);
+            // ansData削除
+            delete ansData[index];
+        };
+        span.appendChild(closeButton);
+
+        // 選択したテキストをspanに置換する
+        const range = currentSelectionRange.cloneRange();
+        range.deleteContents();
+        range.insertNode(span);
+
+        return span;
+    }
+
+    //　ドラッグされたときの処理
+    document.addEventListener('mouseup', function () {
+        // ユーザーが選択したテキストを取得
+        const selection = window.getSelection();
+        if (!selection.toString()) return;
+        // 現在の選択を保存
+        currentSelectionRange = selection.getRangeAt(0).cloneRange();
+        currentSelectionText = selection.toString()
+        // モーダルを表示する
+        $('#replaceModal').modal('show');
+    });
+
+    // テストを生成する関数
+    function generateTest() {
+        // <p> 要素のHTMLを取得
+        const textHTML = document.querySelector("#text").innerHTML;
+
+        // テスト保存
+        testData = textHTML.replace(/<button[^>]*>x<\/button>/g, '');
+
+        // テスト復元
+        document.getElementById('testContainer').innerHTML = `<p>テスト:</p><p>${testData}</p>`;
+
+        // ansDataの回答(values)をリストに変換
+        const answers = Object.values(ansData);
+        document.getElementById('answer').innerHTML = `<p>回答:</p><p>${answers.join(', ')}</p>`;
+
+        // 採点ボタンの追加
+        const gradeButton = document.createElement('button');
+        gradeButton.textContent = '採点する';
+        gradeButton.onclick = gradeTest; // 採点関数を呼び出す
+        document.getElementById('testContainer').appendChild(gradeButton);
+    }
+
+    // 採点ボタンがクリックされたときの処理
+    function gradeTest() {
+        // 採点結果を保存する変数
+        let score = 0;
+        // 採点結果をリセット
+        gradingResults.score = 0;
+        gradingResults.answers = [];
+
+        // テストコンテナ内のすべてのspan要素を取得して、各span要素に対してループ処理
+        document.querySelectorAll("#testContainer span").forEach(span => {
+            // spanの中のselectやinputを取得（selectの場合は選択された選択肢、inputの場合は入力値）
+            const userAnswer = span.querySelector('select, input').value;
+
+            //spanの中にselectが存在しない場合nullが入る
+            const select = span.querySelector('select');
+
+            // 正解のデータと比較
+            if (ansData[span.getAttribute('span-id')] === userAnswer) {
+                // 正解の場合、スコアを増やす
+                score++;
+                // 正解であることを示すスタイルを適用
+                if (select) select.style.backgroundColor = 'lightgreen';
+                else span.querySelector('input').style.backgroundColor = 'lightgreen';
+            } else {
+                // 不正解の場合、間違いを示すスタイルを適用
+                if (select) select.style.backgroundColor = 'lightcoral';
+                else span.querySelector('input').style.backgroundColor = 'lightcoral';
+            }
+        });
+
+        // 採点結果と回答を保存
+        gradingResults.score = score;
+        document.querySelectorAll("#testContainer span").forEach(span => {
+            gradingResults.answers.push(span.querySelector('select, input').value);
+        });
+
+        // 採点結果を表示
+        alert(`あなたのスコア: ${score} / ${Object.keys(ansData).length}`);
+    }
+
+    // 答案表示ボタンがクリックされたときの処理
+    document.getElementById('showAnswersButton').addEventListener('click', function() {
+        // スコアと回答を答案表示エリアに表示
+        const displayArea = document.getElementById('answersDisplay');
+        displayArea.innerHTML = `<p>スコア: ${gradingResults.score} / ${Object.keys(ansData).length}</p>`;
+        displayArea.innerHTML += `<p>回答: ${gradingResults.answers.join(', ')}</p>`;
+    });
+</script>
+</body>
+</html>
